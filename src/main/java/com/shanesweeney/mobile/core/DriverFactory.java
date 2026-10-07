@@ -6,15 +6,9 @@ import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
 
-import java.nio.file.Path;
 import java.time.Duration;
 
 public final class DriverFactory {
-    // Native app builds fetched by scripts/download-apps.sh. Appium installs them on session start.
-    private static final Path ROOT = Path.of(System.getProperty("user.dir"));
-    private static final Path ANDROID_APP = ROOT.resolve("apps/android.apk");
-    private static final Path IOS_APP = ROOT.resolve("apps/ios.app");
-
     private static final Duration DEVICE_BOOT_TIMEOUT = Duration.ofMinutes(3);
     // Ends the session if the client stops sending commands, e.g. a paused debugger or a killed JVM.
     private static final Duration NEW_COMMAND_TIMEOUT = Duration.ofMinutes(5);
@@ -40,8 +34,8 @@ public final class DriverFactory {
                 .setNewCommandTimeout(NEW_COMMAND_TIMEOUT)
                 // Runtime permission dialogs would otherwise block the first screen at random.
                 .setAutoGrantPermissions(true)
-                .setApp(ANDROID_APP.toString())
-                .setAppPackage("com.wdiodemoapp")
+                .setApp(AppUnderTest.ANDROID_APP.toString())
+                .setAppPackage(AppUnderTest.ANDROID_PACKAGE)
                 .setAppActivity(".MainActivity");
     }
 
@@ -52,8 +46,8 @@ public final class DriverFactory {
                 .setSimulatorStartupTimeout(DEVICE_BOOT_TIMEOUT)
                 .setWdaLocalPort(device.wdaLocalPort())
                 .setNewCommandTimeout(NEW_COMMAND_TIMEOUT)
-                .setApp(IOS_APP.toString())
-                .setBundleId("org.wdiodemoapp");
+                .setApp(AppUnderTest.IOS_APP.toString())
+                .setBundleId(AppUnderTest.IOS_BUNDLE_ID);
         if (Config.PLATFORM_VERSION != null) {
             options.setPlatformVersion(Config.PLATFORM_VERSION);
         }
