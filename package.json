@@ -1,0 +1,16 @@
+{
+  "name": "mobile-automation-framework",
+  "version": "1.0.0",
+  "description": "Appium Java mobile automation framework",
+  "scripts": {
+    "postinstall": "npm --prefix .appium install && bash scripts/download-apps.sh",
+    "appium": "APPIUM_HOME=./.appium appium --config .appiumrc.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "private": true,
+  "devDependencies": {
+    "appium": "^3.8.0"
+  }
+}

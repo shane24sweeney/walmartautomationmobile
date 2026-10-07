@@ -1,0 +1,11 @@
+target/
+node_modules/
+# Appium drivers are installed from .appium/package.json; only the manifests are committed.
+.appium/node_modules/
+# App builds are downloaded by scripts/download-apps.sh.
+apps/
+*.log
+.idea/
+.vscode/
+*.iml
+.DS_Store
