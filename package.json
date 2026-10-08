@@ -4,13 +4,16 @@
   "description": "Appium Java mobile automation framework",
   "scripts": {
     "postinstall": "npm --prefix .appium install && bash scripts/download-apps.sh",
-    "appium": "APPIUM_HOME=./.appium appium --config .appiumrc.json"
+    "appium": "APPIUM_HOME=./.appium appium --config .appiumrc.json",
+    "report": "allure generate target/allure-results --output target/allure-report --report-name \"Mobile automation\"",
+    "report:open": "allure open target/allure-report"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "private": true,
   "devDependencies": {
+    "allure": "^3.20.1",
     "appium": "^3.8.0"
   }
 }

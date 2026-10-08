@@ -5,6 +5,7 @@ import com.shanesweeney.mobile.core.Gestures;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.HasOnScreenKeyboard;
+import io.qameta.allure.Allure;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -12,6 +13,8 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.List;
@@ -30,6 +33,7 @@ public abstract class BasePage {
 
     protected final AppiumDriver driver;
     protected final Gestures gestures;
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected BasePage(AppiumDriver driver) {
         this.driver = driver;
@@ -72,6 +76,7 @@ public abstract class BasePage {
     }
 
     protected void tap(By locator) {
+        step("Tap " + locator);
         // Re-finds the element each poll, so a re-render between lookup and click is retried.
         waitUntil("waiting to tap " + locator, d -> {
             WebElement element = d.findElement(locator);
@@ -89,6 +94,8 @@ public abstract class BasePage {
      * UiAutomator2 sets the text directly and needs no keyboard.
      */
     protected void type(By locator, String text) {
+        // The text is left out on purpose: it may be a password.
+        step("Type into " + locator);
         waitUntil("waiting to type into " + locator, d -> {
             WebElement input = d.findElement(locator);
             if (Config.PLATFORM == Config.Platform.IOS && !((HasOnScreenKeyboard) d).isKeyboardShown()) {
@@ -131,6 +138,7 @@ public abstract class BasePage {
      * once scrolled to. Swipes stay clear of {@code avoid}, e.g. a carousel that would capture them.
      */
     protected WebElement scrollTo(By locator, By avoid) {
+        step("Scroll to " + locator);
         for (int i = 0; i < MAX_SCROLLS; i++) {
             List<WebElement> found = driver.findElements(locator);
             if (!found.isEmpty() && found.get(0).isDisplayed()) {
@@ -147,6 +155,7 @@ public abstract class BasePage {
      * pressing Return would submit the form, and fixed screen coordinates differ per screen.
      */
     protected void hideKeyboard(By nonInteractiveElement) {
+        step("Hide the keyboard");
         // A tap while the keyboard is still sliding in is ignored, so tap again until it is gone.
         waitUntil("waiting for the keyboard to close", d -> {
             if (!((HasOnScreenKeyboard) d).isKeyboardShown()) {
@@ -155,5 +164,11 @@ public abstract class BasePage {
             d.findElement(nonInteractiveElement).click();
             return false;
         });
+    }
+
+    /** Records one user action in the log and as a step in the Allure report. */
+    private void step(String action) {
+        log.info(action);
+        Allure.step(action);
     }
 }

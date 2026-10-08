@@ -1,6 +1,7 @@
 package com.shanesweeney.mobile.core;
 
 import io.appium.java_client.AppiumDriver;
+import io.qameta.allure.Allure;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
@@ -8,6 +9,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Pause;
 import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.List;
@@ -17,6 +20,7 @@ import java.util.List;
  * Coordinates are screen pixels on Android and points on iOS; both come from the driver.
  */
 public final class Gestures {
+    private static final Logger log = LoggerFactory.getLogger(Gestures.class);
     private static final Duration SWIPE = Duration.ofMillis(500);
     // React Native drag handlers only pick up a drag after the finger rests for a moment.
     private static final Duration DRAG_HOLD = Duration.ofMillis(300);
@@ -29,6 +33,7 @@ public final class Gestures {
     }
 
     public void swipe(Point from, Point to) {
+        step("Swipe from " + from + " to " + to);
         press(from, Duration.ZERO, to, SWIPE);
     }
 
@@ -65,7 +70,10 @@ public final class Gestures {
     }
 
     public void dragAndDrop(WebElement source, WebElement target) {
-        press(center(source), DRAG_HOLD, center(target), DRAG_MOVE);
+        Point from = center(source);
+        Point to = center(target);
+        step("Drag from " + from + " to " + to);
+        press(from, DRAG_HOLD, to, DRAG_MOVE);
     }
 
     public Dimension screenSize() {
@@ -86,5 +94,10 @@ public final class Gestures {
                 .addAction(finger.createPointerMove(move, PointerInput.Origin.viewport(), to.x, to.y))
                 .addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
         driver.perform(List.of(sequence));
+    }
+
+    private static void step(String action) {
+        log.info(action);
+        Allure.step(action);
     }
 }

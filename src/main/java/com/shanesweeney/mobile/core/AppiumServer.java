@@ -2,6 +2,8 @@ package com.shanesweeney.mobile.core;
 
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import io.appium.java_client.service.local.AppiumServiceBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.HttpURLConnection;
@@ -12,6 +14,7 @@ import java.util.Map;
 
 /** Starts the project-local Appium server once per JVM unless one is already listening. */
 public final class AppiumServer {
+    private static final Logger log = LoggerFactory.getLogger(AppiumServer.class);
     private static final URL URL = Config.APPIUM_URL;
     private static final Path ROOT = Path.of(System.getProperty("user.dir"));
     private static AppiumDriverLocalService service;
@@ -19,9 +22,14 @@ public final class AppiumServer {
     private AppiumServer() {}
 
     public static synchronized URL ensureRunning() {
-        if (service != null || isReady()) {
+        if (service != null) {
             return URL;
         }
+        if (isReady()) {
+            log.info("Using the Appium server already running at {}", URL);
+            return URL;
+        }
+        log.info("Starting Appium at {}; its log is appium.log", URL);
         service = new AppiumServiceBuilder()
                 .withAppiumJS(ROOT.resolve("node_modules/appium/index.js").toFile())
                 .withIPAddress(URL.getHost())

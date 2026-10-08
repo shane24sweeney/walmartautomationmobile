@@ -1,5 +1,8 @@
 package com.shanesweeney.mobile.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -10,6 +13,7 @@ import java.util.stream.IntStream;
  * sessions never share an emulator/simulator or the local ports Appium uses to reach it.
  */
 public final class DevicePool {
+    private static final Logger log = LoggerFactory.getLogger(DevicePool.class);
     public record Device(int index, String name) {
         /** UiAutomator2 server port on the host; must be unique per Android session. */
         public int systemPort() {
@@ -32,7 +36,9 @@ public final class DevicePool {
     /** Blocks until a device is free, so extra test threads queue instead of colliding. */
     public static Device acquire() {
         try {
-            return FREE.take();
+            Device device = FREE.take();
+            log.info("Acquired device {}", device.name());
+            return device;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while waiting for a free device", e);
@@ -40,6 +46,7 @@ public final class DevicePool {
     }
 
     public static void release(Device device) {
+        log.info("Released device {}", device.name());
         FREE.add(device);
     }
 }

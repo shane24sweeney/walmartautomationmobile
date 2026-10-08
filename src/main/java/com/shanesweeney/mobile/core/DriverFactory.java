@@ -6,9 +6,13 @@ import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Duration;
 
 public final class DriverFactory {
+    private static final Logger log = LoggerFactory.getLogger(DriverFactory.class);
     private static final Duration DEVICE_BOOT_TIMEOUT = Duration.ofMinutes(3);
     // Ends the session if the client stops sending commands, e.g. a paused debugger or a killed JVM.
     private static final Duration NEW_COMMAND_TIMEOUT = Duration.ofMinutes(5);
@@ -16,11 +20,14 @@ public final class DriverFactory {
     private DriverFactory() {}
 
     public static AppiumDriver create(DevicePool.Device device) {
+        log.info("Starting {} session on {}", Config.PLATFORM, device.name());
         // No implicit wait: BasePage uses explicit/fluent waits, and mixing the two compounds timeouts.
-        return switch (Config.PLATFORM) {
+        AppiumDriver driver = switch (Config.PLATFORM) {
             case ANDROID -> new AndroidDriver(AppiumServer.ensureRunning(), androidOptions(device));
             case IOS -> new IOSDriver(AppiumServer.ensureRunning(), iosOptions(device));
         };
+        log.info("Session {} started on {}", driver.getSessionId(), device.name());
+        return driver;
     }
 
     private static UiAutomator2Options androidOptions(DevicePool.Device device) {

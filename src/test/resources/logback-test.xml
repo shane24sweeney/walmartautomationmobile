@@ -1,0 +1,23 @@
+<configuration>
+  <!-- The thread name shows which parallel test class (and so which device) logged each line. -->
+  <property name="PATTERN" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg%n"/>
+
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder><pattern>${PATTERN}</pattern></encoder>
+  </appender>
+
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <file>target/test.log</file>
+    <append>false</append>
+    <encoder><pattern>${PATTERN}</pattern></encoder>
+  </appender>
+
+  <!-- Selenium and Appium client internals are noisy at INFO. -->
+  <logger name="org.openqa.selenium" level="WARN"/>
+  <logger name="io.appium" level="WARN"/>
+
+  <root level="${LOG_LEVEL:-INFO}">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </root>
+</configuration>
