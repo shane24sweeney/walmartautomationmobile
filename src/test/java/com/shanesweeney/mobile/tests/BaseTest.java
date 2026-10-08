@@ -3,6 +3,7 @@ package com.shanesweeney.mobile.tests;
 import com.shanesweeney.mobile.core.AppUnderTest;
 import com.shanesweeney.mobile.core.DevicePool;
 import com.shanesweeney.mobile.core.DriverFactory;
+import com.shanesweeney.mobile.pages.TabBar;
 import io.appium.java_client.AppiumDriver;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,6 +21,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(FailureArtifacts.class)
 public abstract class BaseTest {
     protected AppiumDriver driver;
+    // Entry point to every screen: tests navigate from here and never touch the driver.
+    protected TabBar tabBar;
     private DevicePool.Device device;
 
     @BeforeAll
@@ -27,6 +30,7 @@ public abstract class BaseTest {
         device = DevicePool.acquire();
         try {
             driver = DriverFactory.create(device);
+            tabBar = new TabBar(driver);
         } catch (RuntimeException e) {
             DevicePool.release(device);
             device = null;

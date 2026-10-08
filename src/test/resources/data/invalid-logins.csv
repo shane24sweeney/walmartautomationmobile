@@ -1,0 +1,6 @@
+email,password,expectedError
+not-an-email,Password1,Please enter a valid email address
+missing-at.example.com,Password1,Please enter a valid email address
+user@,Password1,Please enter a valid email address
+test@example.com,short,Please enter at least 8 characters
+test@example.com,1234567,Please enter at least 8 characters

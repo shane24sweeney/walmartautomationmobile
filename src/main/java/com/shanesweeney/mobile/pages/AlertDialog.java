@@ -6,9 +6,15 @@ import org.openqa.selenium.By;
 
 /** The native OS alert, reusable by any screen that raises one. Each platform exposes it differently. */
 public class AlertDialog extends BasePage {
-    private static final By TITLE = byPlatform(By.id("com.wdiodemoapp:id/alert_title"), AppiumBy.accessibilityId("Success"));
-    private static final By MESSAGE = byPlatform(By.id("android:id/message"), AppiumBy.accessibilityId("You are logged in!"));
-    private static final By OK = byPlatform(By.id("android:id/button1"), AppiumBy.accessibilityId("OK"));
+    private static final By TITLE = byPlatform(
+            By.id("com.wdiodemoapp:id/alert_title"),
+            AppiumBy.iOSClassChain("**/XCUIElementTypeAlert/**/XCUIElementTypeStaticText[1]"));
+    private static final By MESSAGE = byPlatform(
+            By.id("android:id/message"),
+            AppiumBy.iOSClassChain("**/XCUIElementTypeAlert/**/XCUIElementTypeStaticText[2]"));
+    private static final By OK = byPlatform(
+            By.id("android:id/button1"),
+            AppiumBy.iOSClassChain("**/XCUIElementTypeAlert/**/XCUIElementTypeButton[`label == \"OK\"`]"));
 
     public AlertDialog(AppiumDriver driver) {
         super(driver);
