@@ -75,7 +75,9 @@ jobs:
             appium.log
           if-no-files-found: ignore
 
+  # macOS minutes count 10x against a private repo's Actions quota, so iOS runs on demand only.
   ios:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
     timeout-minutes: 75
     steps:

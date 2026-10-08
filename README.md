@@ -164,7 +164,7 @@ Each device gets its own Appium ports (Android `systemPort` 8200+, iOS `wdaLocal
 
 ## CI
 
-[`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs the suite on every push and pull request: Android on an Ubuntu runner with a KVM-accelerated emulator, iOS on a macOS runner with whichever iPhone simulator the image ships. Each job uploads the Allure report, failure artifacts and logs. Run it manually from the Actions tab to choose tags, e.g. `smoke`.
+[`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs the Android suite on every push and pull request, on an Ubuntu runner with a KVM-accelerated emulator. The iOS job runs on a macOS runner with whichever iPhone simulator the image ships; since macOS minutes count 10x against a private repo's quota, it runs only when the workflow is started manually from the Actions tab, which can also limit the run to tags such as `smoke`. Each job uploads the Allure report, failure artifacts and logs.
 
 ## Locators & capabilities
 
