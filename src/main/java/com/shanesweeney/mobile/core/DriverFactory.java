@@ -105,7 +105,7 @@ public final class DriverFactory {
                 "accessKey", Config.BROWSERSTACK_ACCESS_KEY,
                 "deviceName", nameAndVersion[0],
                 "osVersion", nameAndVersion[1],
-                "projectName", "mobile-automation-framework",
+                "projectName", "walmartautomationmobile",
                 "buildName", Config.BUILD_NAME,
                 "deviceLogs", true));
     }

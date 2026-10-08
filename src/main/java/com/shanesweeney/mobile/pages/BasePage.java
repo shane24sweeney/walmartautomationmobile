@@ -57,8 +57,12 @@ public abstract class BasePage {
      * is the timeout message, so a failure says what never happened instead of naming a lambda.
      */
     protected <T> T waitUntil(String description, Function<? super AppiumDriver, T> condition) {
+        return waitUntil(description, Config.WAIT_TIMEOUT, condition);
+    }
+
+    protected <T> T waitUntil(String description, Duration timeout, Function<? super AppiumDriver, T> condition) {
         return new FluentWait<>(driver)
-                .withTimeout(Config.WAIT_TIMEOUT)
+                .withTimeout(timeout)
                 .pollingEvery(POLLING)
                 // Lookups that fail mid re-render are retried instead of failing the wait.
                 .ignoring(NoSuchElementException.class)

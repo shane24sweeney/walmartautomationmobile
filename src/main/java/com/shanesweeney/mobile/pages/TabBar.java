@@ -3,9 +3,15 @@ package com.shanesweeney.mobile.pages;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import java.time.Duration;
 
 /** The bottom navigation shown on every screen; each method returns the screen it opens. */
 public class TabBar extends BasePage {
+    // A cold launch (fresh install, or several emulators sharing a CPU) can hold the splash screen
+    // well past the normal wait.
+    private static final Duration APP_LAUNCH_TIMEOUT = Duration.ofSeconds(60);
     private static final By LOGIN = AppiumBy.accessibilityId("Login");
     private static final By FORMS = AppiumBy.accessibilityId("Forms");
     private static final By SWIPE = AppiumBy.accessibilityId("Swipe");
@@ -13,6 +19,13 @@ public class TabBar extends BasePage {
 
     public TabBar(AppiumDriver driver) {
         super(driver);
+    }
+
+    /** Waits for the app to finish launching, so the first tap of a test doesn't race the splash screen. */
+    public TabBar waitUntilShown() {
+        waitUntil("waiting for the app to launch and show the tab bar", APP_LAUNCH_TIMEOUT,
+                ExpectedConditions.visibilityOfElementLocated(LOGIN));
+        return this;
     }
 
     public LoginScreen openLogin() {

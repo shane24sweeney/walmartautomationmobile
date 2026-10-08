@@ -41,6 +41,7 @@ public abstract class BaseTest {
     @BeforeEach
     void restartApp() {
         AppUnderTest.restart(driver);
+        tabBar.waitUntilShown();
     }
 
     @AfterAll
