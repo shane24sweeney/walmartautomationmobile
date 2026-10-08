@@ -12,7 +12,10 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.Map;
 
-/** Starts the project-local Appium server once per JVM unless one is already listening. */
+/**
+ * Starts the project-local Appium server once per JVM unless one is already listening.
+ * A remote server or grid ({@code -DappiumUrl}) is managed elsewhere and used as is.
+ */
 public final class AppiumServer {
     private static final Logger log = LoggerFactory.getLogger(AppiumServer.class);
     private static final URL URL = Config.APPIUM_URL;
@@ -22,7 +25,7 @@ public final class AppiumServer {
     private AppiumServer() {}
 
     public static synchronized URL ensureRunning() {
-        if (service != null) {
+        if (service != null || !isLocal()) {
             return URL;
         }
         if (isReady()) {
@@ -43,6 +46,10 @@ public final class AppiumServer {
         service.start();
         Runtime.getRuntime().addShutdownHook(new Thread(service::stop));
         return URL;
+    }
+
+    private static boolean isLocal() {
+        return URL.getHost().equals("127.0.0.1") || URL.getHost().equals("localhost");
     }
 
     private static boolean isReady() {

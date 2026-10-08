@@ -12,10 +12,18 @@ public final class AppUnderTest {
 
     // Fetched by scripts/download-apps.sh. Appium installs them on session start.
     private static final Path ROOT = Path.of(System.getProperty("user.dir"));
-    public static final Path ANDROID_APP = ROOT.resolve("apps/android.apk");
-    public static final Path IOS_APP = ROOT.resolve("apps/ios.app");
+    private static final Path ANDROID_APP = ROOT.resolve("apps/android.apk");
+    private static final Path IOS_APP = ROOT.resolve("apps/ios.app");
 
     private AppUnderTest() {}
+
+    /** The build to install: {@link Config#APP} if set, otherwise the downloaded build for the platform. */
+    public static String app() {
+        if (Config.APP != null) {
+            return Config.APP;
+        }
+        return (Config.PLATFORM == Config.Platform.IOS ? IOS_APP : ANDROID_APP).toString();
+    }
 
     public static String id() {
         return Config.PLATFORM == Config.Platform.IOS ? IOS_BUNDLE_ID : ANDROID_PACKAGE;
