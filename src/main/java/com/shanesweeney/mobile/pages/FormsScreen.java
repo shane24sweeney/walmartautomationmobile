@@ -50,6 +50,7 @@ public class FormsScreen extends BasePage {
         if (Config.PLATFORM == Config.Platform.IOS) {
             throw new UnsupportedOperationException("The dropdown picker does not open under XCUITest");
         }
+        scrollTo(DROPDOWN);
         tap(DROPDOWN);
         tap(byText(option));
         return this;
@@ -60,6 +61,7 @@ public class FormsScreen extends BasePage {
     }
 
     public AlertDialog tapActiveButton() {
+        scrollTo(ACTIVE_BUTTON);
         tap(ACTIVE_BUTTON);
         return new AlertDialog(driver);
     }

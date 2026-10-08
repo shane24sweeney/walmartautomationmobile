@@ -192,6 +192,7 @@ Issues found running this suite, and how the framework handles them:
 | Carousel swipe ignored | Swipe started in the gap between cards | Swipes start 70% across the card |
 | Assertion reads the old carousel card | Read during the snap animation | `swipeCarouselLeft` waits until the active card changes |
 | Drag-and-drop finds the wrong piece | Remaining pieces re-layout after each drop | Wait for the dropped piece to disappear before the next drag |
+| Taps on SIGN UP / Active fail in CI only | CI's 320x640 emulator puts them below the fold, and Android leaves off-screen elements out of the tree | Pages `scrollTo` lower buttons before tapping |
 | Random permission dialogs | Android runtime permissions | `autoGrantPermissions` |
 | Parallel sessions collide | Shared device or port | `DevicePool` gives each thread its own device and ports |
 

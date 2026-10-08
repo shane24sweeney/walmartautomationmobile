@@ -46,6 +46,7 @@ public class LoginScreen extends BasePage {
         type(EMAIL_INPUT, email);
         type(PASSWORD_INPUT, password);
         type(CONFIRM_PASSWORD_INPUT, confirmPassword);
+        scrollTo(SIGN_UP_BUTTON);
         tap(SIGN_UP_BUTTON);
         return new AlertDialog(driver);
     }
@@ -53,6 +54,7 @@ public class LoginScreen extends BasePage {
     private void submitLogin(String email, String password) {
         type(EMAIL_INPUT, email);
         type(PASSWORD_INPUT, password);
+        scrollTo(LOGIN_BUTTON);
         tap(LOGIN_BUTTON);
     }
 }

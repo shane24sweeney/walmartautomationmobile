@@ -138,17 +138,25 @@ public abstract class BasePage {
     }
 
     /**
-     * Scrolls down until the element is on screen; Android only adds off-screen elements to the tree
-     * once scrolled to. Swipes stay clear of {@code avoid}, e.g. a carousel that would capture them.
+     * Scrolls down until the element is on screen, for content below the fold on smaller screens;
+     * Android only adds off-screen elements to the tree once scrolled to.
      */
+    protected WebElement scrollTo(By locator) {
+        return scrollTo(locator, null);
+    }
+
+    /** As {@link #scrollTo(By)}, with swipes kept clear of {@code avoid}, e.g. a carousel that would capture them. */
     protected WebElement scrollTo(By locator, By avoid) {
-        step("Scroll to " + locator);
         for (int i = 0; i < MAX_SCROLLS; i++) {
             List<WebElement> found = driver.findElements(locator);
             if (!found.isEmpty() && found.get(0).isDisplayed()) {
                 return found.get(0);
             }
-            gestures.scrollDown(driver.findElements(avoid).stream().findFirst().map(WebElement::getRect).orElse(null));
+            if (i == 0) {
+                step("Scroll to " + locator);
+            }
+            gestures.scrollDown(avoid == null ? null
+                    : driver.findElements(avoid).stream().findFirst().map(WebElement::getRect).orElse(null));
         }
         return waitForVisible(locator);
     }
