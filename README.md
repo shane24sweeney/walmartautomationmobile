@@ -30,7 +30,7 @@ src/main/java/com/shanesweeney/mobile
 
 src/test/java/com/shanesweeney/mobile/tests
 ├── BaseTest            Layer 1: session per class, app restart per test
-├── FailureArtifacts    screenshot, UI tree and device log on failure
+├── TestArtifacts       logs for every test; screenshot and UI tree on failure
 ├── LoginTest
 ├── FormsTest
 └── GesturesTest
@@ -60,7 +60,7 @@ Rules that keep it maintainable:
 | Factory | `DriverFactory` | One place picks platform, target and capabilities |
 | Object pool | `DevicePool` | Safe device sharing across parallel threads |
 | Singleton service | `AppiumServer` | One server per run, reused if already running |
-| Extension / observer | `FailureArtifacts` (JUnit `TestWatcher`) | Failure capture without touching test code |
+| Extension / observer | `TestArtifacts` (JUnit callbacks) | Log and failure capture without touching test code |
 | Data-driven tests | `@CsvFileSource` | New cases are new CSV rows, not new code |
 
 ### Adding a screen and test
@@ -164,7 +164,7 @@ If `threads` is higher than the number of devices, extra classes wait for a free
 
 ## Reports and logs
 
-- **Allure:** every user action is a report step, and failed tests carry their screenshot, UI tree, device log, and the Appium server and HTTP log lines from that test's session.
+- **Allure:** every user action is a report step. Every test, passed or failed, on Android and iOS, carries its own logs: the test log, the device log (logcat or syslog), and its Appium server and HTTP log lines. Failed tests also carry a screenshot and the UI tree, saved to `target/failure-artifacts/` too.
   ```bash
   npm run report        # build target/allure-report from target/allure-results
   npm run report:open   # open it in a browser
@@ -236,7 +236,7 @@ Re-runs are for finding flaky tests, not hiding them. Fix the cause using the fa
 
 ## Debugging
 
-Every failed test saves its screenshot (`.png`), UI hierarchy (`.xml`) and device log (`.log`, logcat on Android or syslog on iOS) to `target/failure-artifacts/` and attaches them to the Allure report. The `.xml` shows the element tree Appium saw, which helps when a locator doesn't match.
+Every failed test saves its screenshot (`.png`), UI hierarchy (`.xml`), test log, device log (logcat on Android or syslog on iOS), and Appium server and HTTP log lines to `target/failure-artifacts/` and attaches them to the Allure report. The `.xml` shows the element tree Appium saw, which helps when a locator doesn't match.
 
 ```bash
 mvn test -Dmaven.surefire.debug -Dtest=LoginTest   # JVM waits for a debugger on port 5005
@@ -261,3 +261,4 @@ npm run appium
 
 - The iOS build's dropdown picker does not open under XCUITest (element click, W3C tap and `mobile: tap` all fail), so `selectsDropdownOption` runs on Android only and is skipped on iOS.
 - The demo app's carousel sometimes stops responding after several swipes in a row; tests only swipe from a freshly started app.
+- Run one `mvn test` at a time per checkout. A second run reuses the first run's Appium server, which stops when the first run ends (failing the second with `UnreachableBrowserException`), and both write the same `target/` logs and reports. To run Android and iOS side by side, use separate clones or `npm run appium` started on its own.

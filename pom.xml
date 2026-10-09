@@ -153,6 +153,8 @@
                 <logback.configurationFile>logback-reportportal.xml</logback.configurationFile>
                 <rp.api.key>${env.RP_API_KEY}</rp.api.key>
                 <rp.attributes>platform:${platform}</rp.attributes>
+                <!-- Show @DisabledIf tests (e.g. the iOS dropdown) as skipped with their reason, instead of omitting them. -->
+                <reportDisabledTests>true</reportDisabledTests>
               </systemPropertyVariables>
             </configuration>
           </plugin>

@@ -80,9 +80,9 @@ public final class DriverFactory {
                 .setEnforceAppInstall(false)
                 // Session
                 .setNewCommandTimeout(NEW_COMMAND_TIMEOUT)
-                // FailureArtifacts reads logcat/syslog, so log capture must stay on.
+                // TestArtifacts reads logcat/syslog, so log capture must stay on.
                 .setSkipLogCapture(false)
-                // FailureArtifacts already saves the page source of a failed test.
+                // TestArtifacts already saves the page source of a failed test.
                 .setPrintPageSourceOnFindFailure(false)
                 .setEventTimings(false)
                 // Deletes the temporary files Appium created for the session when it ends.

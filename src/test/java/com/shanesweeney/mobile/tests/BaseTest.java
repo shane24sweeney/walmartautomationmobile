@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * so tests never depend on each other or on the order they run in.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ExtendWith(FailureArtifacts.class)
+@ExtendWith(TestArtifacts.class)
 public abstract class BaseTest {
     protected AppiumDriver driver;
     // Entry point to every screen: tests navigate from here and never touch the driver.
