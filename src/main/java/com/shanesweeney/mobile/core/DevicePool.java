@@ -3,6 +3,7 @@ package com.shanesweeney.mobile.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URL;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -23,6 +24,11 @@ public final class DevicePool {
         /** WebDriverAgent port on the host; must be unique per iOS session. */
         public int wdaLocalPort() {
             return 8100 + index;
+        }
+
+        /** Spreads devices across the configured Appium servers, round robin. */
+        public URL appiumUrl() {
+            return Config.APPIUM_URLS.get(index % Config.APPIUM_URLS.size());
         }
     }
 

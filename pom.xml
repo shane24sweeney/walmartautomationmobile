@@ -22,6 +22,8 @@
     <platform>android</platform>
     <!-- Test classes run concurrently; set to the number of devices in -Ddevices. -->
     <threads>1</threads>
+    <!-- Lets JUnit load extensions listed by jars on the classpath; the reportportal profile turns it on. -->
+    <junit.autodetect>false</junit.autodetect>
   </properties>
 
   <dependencyManagement>
@@ -109,10 +111,53 @@
               junit.jupiter.execution.parallel.mode.classes.default = concurrent
               junit.jupiter.execution.parallel.config.strategy = fixed
               junit.jupiter.execution.parallel.config.fixed.parallelism = ${threads}
+              junit.jupiter.extensions.autodetection.enabled = ${junit.autodetect}
             </configurationParameters>
           </properties>
         </configuration>
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!--
+      mvn test -Preportportal sends results, logs and failure artifacts to ReportPortal
+      (src/test/resources/reportportal.properties). Needs RP_API_KEY in the environment.
+    -->
+    <profile>
+      <id>reportportal</id>
+      <properties>
+        <junit.autodetect>true</junit.autodetect>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>com.epam.reportportal</groupId>
+          <artifactId>agent-java-junit5</artifactId>
+          <version>5.5.8</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.epam.reportportal</groupId>
+          <artifactId>logger-java-logback</artifactId>
+          <version>5.4.0</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <systemPropertyVariables>
+                <logback.configurationFile>logback-reportportal.xml</logback.configurationFile>
+                <rp.api.key>${env.RP_API_KEY}</rp.api.key>
+                <rp.attributes>platform:${platform}</rp.attributes>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

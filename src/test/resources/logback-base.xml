@@ -1,0 +1,33 @@
+<!-- Appenders and loggers shared by logback-test.xml and logback-reportportal.xml. -->
+<included>
+  <!-- The thread name shows which parallel test class (and so which device) logged each line. -->
+  <property name="PATTERN" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg%n"/>
+
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder><pattern>${PATTERN}</pattern></encoder>
+  </appender>
+
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <file>target/test.log</file>
+    <append>false</append>
+    <encoder><pattern>${PATTERN}</pattern></encoder>
+  </appender>
+
+  <!-- Every client-to-Appium HTTP command and response (HttpLogFilter), kept out of the console. -->
+  <appender name="HTTP_FILE" class="ch.qos.logback.core.FileAppender">
+    <file>target/appium-http.log</file>
+    <append>false</append>
+    <encoder><pattern>${PATTERN}</pattern></encoder>
+  </appender>
+
+  <logger name="appium.http" level="${HTTP_LOG_LEVEL:-DEBUG}" additivity="false">
+    <appender-ref ref="HTTP_FILE"/>
+  </logger>
+
+  <!-- Selenium and Appium client internals are noisy at INFO. -->
+  <logger name="org.openqa.selenium" level="WARN"/>
+  <logger name="io.appium" level="WARN"/>
+
+  <!-- FailureArtifacts sends files to ReportPortal through this logger; off unless that config enables it. -->
+  <logger name="reportportal.attachments" level="OFF"/>
+</included>
