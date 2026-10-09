@@ -1,0 +1,2 @@
+# Loaded only when JUnit extension autodetection is on, i.e. with -Preportportal.
+com.epam.reportportal.junit5.ReportPortalExtension

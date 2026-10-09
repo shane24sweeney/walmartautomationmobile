@@ -1,0 +1,18 @@
+<!-- Used by the reportportal Maven profile: the usual logs, plus every test's log lines sent to ReportPortal. -->
+<configuration>
+  <include resource="logback-base.xml"/>
+
+  <appender name="REPORT_PORTAL" class="com.epam.reportportal.logback.appender.ReportPortalAppender">
+    <encoder><pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg%n</pattern></encoder>
+  </appender>
+
+  <logger name="reportportal.attachments" level="INFO" additivity="false">
+    <appender-ref ref="REPORT_PORTAL"/>
+  </logger>
+
+  <root level="${LOG_LEVEL:-INFO}">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+    <appender-ref ref="REPORT_PORTAL"/>
+  </root>
+</configuration>

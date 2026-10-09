@@ -11,6 +11,11 @@ on:
         required: false
         default: ""
 
+# The JUnit report step publishes a check run with the failed tests.
+permissions:
+  contents: read
+  checks: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -59,6 +64,16 @@ jobs:
           # UiAutomator2 attaches to the running emulator whose AVD name matches -Davd.
           script: mvn -B test -Dplatform=android -Davd=ci $GROUPS_ARG
 
+      # Lists each failed test with its message and stack trace on the run's summary and checks page.
+      - name: Publish JUnit results
+        if: ${{ !cancelled() }}
+        uses: mikepenz/action-junit-report@v6
+        with:
+          report_paths: target/surefire-reports/TEST-*.xml
+          check_name: android tests
+          detailed_summary: true
+          include_skipped: true
+
       - name: Build Allure report
         if: ${{ !cancelled() }}
         run: npm run report
@@ -72,7 +87,8 @@ jobs:
             target/failure-artifacts/
             target/surefire-reports/
             target/test.log
-            appium.log
+            appium-*.log
+            target/appium-http.log
           if-no-files-found: ignore
 
   # macOS minutes count 10x against a private repo's Actions quota, so iOS runs on demand only.
@@ -106,6 +122,16 @@ jobs:
       - name: Run tests on an iOS simulator
         run: mvn -B test -Dplatform=ios $GROUPS_ARG
 
+      # Lists each failed test with its message and stack trace on the run's summary and checks page.
+      - name: Publish JUnit results
+        if: ${{ !cancelled() }}
+        uses: mikepenz/action-junit-report@v6
+        with:
+          report_paths: target/surefire-reports/TEST-*.xml
+          check_name: ios tests
+          detailed_summary: true
+          include_skipped: true
+
       - name: Build Allure report
         if: ${{ !cancelled() }}
         run: npm run report
@@ -119,5 +145,6 @@ jobs:
             target/failure-artifacts/
             target/surefire-reports/
             target/test.log
-            appium.log
+            appium-*.log
+            target/appium-http.log
           if-no-files-found: ignore

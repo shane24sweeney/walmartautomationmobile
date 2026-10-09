@@ -110,11 +110,16 @@ All settings live in `core/Config.java`. Each can be set as a `-D` property or a
 | `avd` / `AVD` | `Pixel_8_API_35` | Android emulator to boot |
 | `deviceName` / `DEVICE_NAME` | `iPhone 17` | iOS simulator to boot |
 | `devices` / `DEVICES` | the single device above | Comma-separated device pool for parallel runs |
-| `platformVersion` / `PLATFORM_VERSION` | newest installed | iOS simulator runtime |
+| `platformVersion` / `PLATFORM_VERSION` | any | OS version the device must run (iOS: simulator runtime) |
 | `app` / `APP` | `apps/` build | App to install: path, URL or BrowserStack `bs://` ID |
-| `appiumUrl` / `APPIUM_URL` | `http://127.0.0.1:4723` | Appium server; a remote URL (e.g. a Selenium Grid) is used as is |
+| `appiumUrl` / `APPIUM_URL` | `http://127.0.0.1:4723` | Comma-separated Appium servers, shared round robin by the devices; local ones are started, remote ones (e.g. a Selenium Grid) used as is |
 | `xcodeOrgId` / `XCODE_ORG_ID` | none | Apple team ID to sign WebDriverAgent on a real iPhone |
 | `waitTimeout` / `WAIT_TIMEOUT` | `10` | Seconds each explicit/fluent wait allows |
+| `noReset` / `NO_RESET` | `false` | Keep app data between sessions |
+| `fullReset` / `FULL_RESET` | `false` | Reinstall the app for every session (not with `noReset`) |
+| `language` / `LANGUAGE` | device setting | Device language, e.g. `es` |
+| `locale` / `LOCALE` | device setting | Device region, e.g. `ES` |
+| `headless` / `HEADLESS` | `false` | Boot emulators/simulators without a window |
 
 ### Devices
 
@@ -149,22 +154,45 @@ mvn test -Dthreads=2 -Ddevices=Pixel_8_API_35,Pixel_8_API_35_2
 mvn test -Dplatform=ios -Dthreads=2 -Ddevices="iPhone 17,iPhone 17e"
 ```
 
-Each device gets its own Appium ports (Android `systemPort` 8200+, iOS `wdaLocalPort` 8100+), and one Appium server handles every session. If `threads` is higher than the number of devices, extra classes wait for a free device. On two Android emulators the full suite takes about 3 minutes instead of about 9.5 on one.
+Each device gets its own Appium ports (Android `systemPort` 8200+, iOS `wdaLocalPort` 8100+), and by default one Appium server handles every session. To give each device its own server, list one per device; device N uses server N modulo the list, and each local server is started on its port:
+
+```bash
+mvn test -Dthreads=2 -Ddevices=Pixel_8_API_35,Pixel_8_API_35_2 -DappiumUrl=http://127.0.0.1:4723,http://127.0.0.1:4724
+```
+
+If `threads` is higher than the number of devices, extra classes wait for a free device. On two Android emulators the full suite takes about 3 minutes instead of about 9.5 on one.
 
 ## Reports and logs
 
-- **Allure:** every user action is a report step, and failed tests carry their screenshot, UI tree and device log.
+- **Allure:** every user action is a report step, and failed tests carry their screenshot, UI tree, device log, and the Appium server and HTTP log lines from that test's session.
   ```bash
   npm run report        # build target/allure-report from target/allure-results
   npm run report:open   # open it in a browser
   ```
 - **Logs:** console and `target/test.log`, with the thread name on every line so parallel runs show which device did what. `LOG_LEVEL=DEBUG mvn test` for more detail. Typed text is never logged, since it may be a password.
-- **Appium server log:** `appium.log`.
+- **Appium server logs:** `appium-<port>.log`, one per local server, including the server's `[HTTP]` request/response lines.
+- **Client HTTP log:** `target/appium-http.log` has every command the tests sent to Appium and its response (status, duration, body; large bodies shortened, BrowserStack access key masked). `HTTP_LOG_LEVEL=INFO` turns it off.
 - **JUnit results:** `target/surefire-reports/`.
+- **Reading logs in VS Code:** the free [Log File Highlighter](https://marketplace.visualstudio.com/items?itemName=emilast.LogFileHighlighter) extension colours timestamps, levels and errors in `.log` files.
+
+### ReportPortal
+
+[ReportPortal](https://reportportal.io) (free, open source, self-hosted) keeps the history of every run, groups failures with the same cause, and its auto-analysis labels new failures as product bug, automation bug or system issue from past decisions. The `reportportal` Maven profile sends each test, its log lines and the failure artifacts above; without it nothing changes.
+
+```bash
+# Start a local server (needs Docker with ~8 GB of memory); UI at http://localhost:8080, superadmin / erebus
+curl -LO https://raw.githubusercontent.com/reportportal/reportportal/master/docker-compose.yml
+docker compose -p reportportal up -d
+
+# Create an API key under your profile in the UI, then
+RP_API_KEY=... mvn test -Preportportal
+```
+
+Settings are in [`reportportal.properties`](src/test/resources/reportportal.properties); override any with `-D`, e.g. `-Drp.endpoint=https://rp.example.com -Drp.project=mobile`. Each launch is tagged with its platform. `docker compose -p reportportal down` stops the server and keeps its data.
 
 ## CI
 
-[`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs the Android suite on every push and pull request, on an Ubuntu runner with a KVM-accelerated emulator. The iOS job runs on a macOS runner with whichever iPhone simulator the image ships; since macOS minutes count 10x against a private repo's quota, it runs only when the workflow is started manually from the Actions tab, which can also limit the run to tags such as `smoke`. Each job uploads the Allure report, failure artifacts and logs.
+[`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs the Android suite on every push and pull request, on an Ubuntu runner with a KVM-accelerated emulator. The iOS job runs on a macOS runner with whichever iPhone simulator the image ships; since macOS minutes count 10x against a private repo's quota, it runs only when the workflow is started manually from the Actions tab, which can also limit the run to tags such as `smoke`. Each job publishes its JUnit results as a check (each failed test with its message and stack trace on the run's summary page) and uploads the Allure report, failure artifacts, Appium server logs and the HTTP log.
 
 ## Locators & capabilities
 
@@ -172,7 +200,8 @@ Each device gets its own Appium ports (Android `systemPort` 8200+, iOS `wdaLocal
 - Use `byPlatform(android, ios)` only where the platforms differ: native alerts (`android:id/...` vs an iOS class chain), Android resource IDs vs iOS names.
 - Text without an ID (validation messages) uses `byText`: a UiSelector on Android, the accessibility ID on iOS.
 - No XPath: it is slow on both platforms and breaks when layout changes.
-- Capabilities use the typed `UiAutomator2Options` / `XCUITestOptions` classes in `DriverFactory`.
+- Capabilities use the typed `UiAutomator2Options` / `XCUITestOptions` classes and are all chained in `DriverFactory`: `commonOptions` for both platforms (device, app, reset, session), then one chain per platform (UiAutomator2 / WebDriverAgent timeouts, animations, alerts, keyboard), then the few that depend on the target (emulator, real device, BrowserStack). Unset optional values are left out of the session request.
+- Not set: browser, Chrome/Safari and webview capabilities (native app only), and alert auto-accept/dismiss (tests assert on the app's alerts).
 
 ## Flaky tests
 
@@ -212,7 +241,8 @@ Every failed test saves its screenshot (`.png`), UI hierarchy (`.xml`) and devic
 ```bash
 mvn test -Dmaven.surefire.debug -Dtest=LoginTest   # JVM waits for a debugger on port 5005
 mvn test -DtrimStackTrace=false                    # full stack traces
-tail -f appium.log                                 # Appium server log
+tail -f appium-4723.log                            # Appium server log
+tail -f target/appium-http.log                     # client-side HTTP commands
 adb logcat                                         # live Android log
 xcrun simctl spawn booted log stream --level debug # live iOS simulator log
 ```
@@ -221,7 +251,7 @@ To inspect elements and try locators on a running app, use [Appium Inspector](ht
 
 ## Appium server
 
-Tests start a project-local Appium server automatically (log in `appium.log`) and reuse one already listening on `appiumUrl`. To run it yourself, for example to watch the log live:
+The framework runs on Appium 3 (pinned in `package.json`). Tests start a project-local Appium server automatically (log in `appium-<port>.log`) and reuse one already listening on `appiumUrl`, failing fast if that local server is not Appium 3. To run it yourself, for example to watch the log live:
 
 ```bash
 npm run appium
