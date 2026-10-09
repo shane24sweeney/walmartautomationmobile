@@ -6,13 +6,18 @@ import com.shanesweeney.mobile.pages.FormsScreen;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @Tag("regression")
 class FormsTest extends BaseTest {
+
+    /** Platform condition for @DisabledIf: skips a test before it starts, so reports show a reason, not an exception. */
+    static boolean isIos() {
+        return Config.PLATFORM == Config.Platform.IOS;
+    }
 
     @Test
     @Tag("smoke")
@@ -32,8 +37,8 @@ class FormsTest extends BaseTest {
 
     @Test
     @DisplayName("selects a dropdown option")
+    @DisabledIf(value = "isIos", disabledReason = "The iOS build's picker does not open under XCUITest")
     void selectsDropdownOption() {
-        assumeTrue(Config.PLATFORM == Config.Platform.ANDROID, "The iOS build's picker does not open under XCUITest");
         FormsScreen forms = tabBar.openForms().selectDropdownOption("Appium is awesome");
         assertEquals("Appium is awesome", forms.dropdownValue());
     }

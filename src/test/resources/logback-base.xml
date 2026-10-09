@@ -28,6 +28,6 @@
   <logger name="org.openqa.selenium" level="WARN"/>
   <logger name="io.appium" level="WARN"/>
 
-  <!-- FailureArtifacts sends files to ReportPortal through this logger; off unless that config enables it. -->
+  <!-- TestArtifacts sends files to ReportPortal through this logger; off unless that config enables it. -->
   <logger name="reportportal.attachments" level="OFF"/>
 </included>
