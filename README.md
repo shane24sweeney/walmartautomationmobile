@@ -260,5 +260,5 @@ npm run appium
 ## Known limitations
 
 - The iOS build's dropdown picker does not open under XCUITest (element click, W3C tap and `mobile: tap` all fail), so `selectsDropdownOption` runs on Android only and is skipped on iOS.
-- The demo app's carousel sometimes stops responding after several swipes in a row; tests only swipe from a freshly started app.
+- The demo app's carousel sometimes stops responding after several swipes in a row, and occasionally ignores a single swipe; tests only swipe from a freshly started app, and `SwipeScreen` swipes once more (logging a warning) if the carousel hasn't moved after 5 seconds.
 - Run one `mvn test` at a time per checkout. A second run reuses the first run's Appium server, which stops when the first run ends (failing the second with `UnreachableBrowserException`), and both write the same `target/` logs and reports. To run Android and iOS side by side, use separate clones or `npm run appium` started on its own.

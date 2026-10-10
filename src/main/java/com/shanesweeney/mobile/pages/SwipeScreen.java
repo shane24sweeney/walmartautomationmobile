@@ -4,8 +4,12 @@ import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,16 +28,30 @@ public class SwipeScreen extends BasePage {
             By.className("android.widget.TextView"),
             AppiumBy.iOSClassChain("XCUIElementTypeStaticText"));
     private static final By HIDDEN_LOGO = AppiumBy.accessibilityId("WebdriverIO logo");
+    private static final Duration SWIPE_SETTLE = Duration.ofSeconds(5);
+    private static final Logger log = LoggerFactory.getLogger(SwipeScreen.class);
 
     public SwipeScreen(AppiumDriver driver) {
         super(driver);
     }
 
+    /**
+     * The demo app's carousel sometimes ignores a swipe outright (it stays on the same card), so a swipe
+     * that hasn't moved it after {@link #SWIPE_SETTLE} is repeated once. The snap animation takes well
+     * under a second, so by then a swipe that did land has settled and isn't counted twice.
+     */
     public SwipeScreen swipeCarouselLeft() {
         String before = activeCardTitle();
         gestures.swipeLeft(waitForVisible(CAROUSEL));
-        // Wait out the snap animation, so callers read the card the carousel settles on.
-        waitUntil("waiting for the carousel to settle on the next card", d -> !before.equals(activeCardTitle()));
+        try {
+            waitUntil("waiting for the carousel to settle on the next card", SWIPE_SETTLE,
+                    d -> !before.equals(activeCardTitle()));
+        } catch (TimeoutException ignored) {
+            log.warn("Carousel still on \"{}\" after a swipe; swiping again", before);
+            gestures.swipeLeft(waitForVisible(CAROUSEL));
+            // Wait out the snap animation, so callers read the card the carousel settles on.
+            waitUntil("waiting for the carousel to settle on the next card", d -> !before.equals(activeCardTitle()));
+        }
         return this;
     }
 
