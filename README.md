@@ -18,11 +18,14 @@ src/main/java/com/shanesweeney/mobile
 │   ├── DevicePool      one device per parallel test class
 │   ├── AppiumServer    starts Appium once per run, or uses a running/remote one
 │   ├── AppUnderTest    app IDs, builds, and restart between tests
+│   ├── Biometrics      enrol Face ID / a fingerprint and simulate scans (simulators, emulators)
 │   └── Gestures        swipe, scroll and drag-and-drop on W3C Actions
 └── pages   Layer 2: page objects, each owning its locators
     ├── BasePage        fluent waits, element actions, logging + report steps
     ├── TabBar          bottom navigation; entry point to every screen
-    ├── LoginScreen     login, sign-up, validation errors
+    ├── LoginScreen     login, sign-up, validation errors, biometric login button
+    ├── BiometricPrompt the system Face ID / fingerprint prompt
+    ├── WebviewScreen   the Web tab's webview, with native/web context switching
     ├── FormsScreen     text input, switch, dropdown, buttons
     ├── SwipeScreen     carousel and scroll-to-element
     ├── DragScreen      drag-and-drop puzzle
@@ -32,8 +35,10 @@ src/test/java/com/shanesweeney/mobile/tests
 ├── BaseTest            Layer 1: session per class, app restart per test
 ├── TestArtifacts       logs for every test; screenshot and UI tree on failure
 ├── LoginTest
+├── BiometricLoginTest  Face ID / fingerprint login (simulators and emulators only)
 ├── FormsTest
-└── GesturesTest
+├── GesturesTest
+└── WebviewTest         hybrid app: web page in a webview, links, back to native
 
 src/test/resources
 ├── data/users.csv           valid accounts, one test run per row
@@ -43,7 +48,7 @@ src/test/resources
 ```
 
 Rules that keep it maintainable:
-- **Tests** navigate from `tabBar`, call pages and assert. They never use locators or the driver.
+- **Tests** navigate from `tabBar`, call pages and assert. They never use locators or the driver, except to hand it to a `core` helper for device setup (e.g. `Biometrics.enrol` in `@BeforeAll`).
 - **Pages** describe user actions and return the page the app lands on. They never assert.
 - **Locators** are private to their page, so a UI change touches one file.
 - **Platform differences** stay inside pages (`byPlatform`) and `DriverFactory`, so tests are platform-neutral.
@@ -256,6 +261,13 @@ The framework runs on Appium 3 (pinned in `package.json`). Tests start a project
 ```bash
 npm run appium
 ```
+
+## Webview and biometric tests
+
+- **Webview** (`WebviewTest`): the Web tab shows the live https://webdriver.io site, so these tests need network access. `WebviewScreen` switches the session into the webview only for each call and always back to the native app, even on failure. On Android, Appium downloads the Chromedriver matching the device's WebView itself; `.appiumrc.json` allows only that one opt-in feature (`uiautomator2:chromedriver_autodownload`).
+- **Biometrics** (`BiometricLoginTest`): runs on simulators and emulators only, and is skipped with a reason on real devices and BrowserStack. It changes the device for the length of the class and puts it back afterwards:
+  - **iOS:** enrols Face ID on the simulator, then unenrols it.
+  - **Android:** sets a screen-lock PIN (`1111`), enrols a fingerprint through Settings (the emulator must be in English), then clears the PIN, which also removes the fingerprint. If a run is killed part-way, the next run clears the leftover PIN before enrolling.
 
 ## Known limitations
 

@@ -129,8 +129,13 @@ public abstract class BasePage {
 
     /** Returns false instead of throwing when the element never becomes visible. */
     protected boolean isDisplayed(By locator) {
+        return isDisplayed(locator, Config.WAIT_TIMEOUT);
+    }
+
+    /** As {@link #isDisplayed(By)} with a shorter wait, for checking that something does not appear. */
+    protected boolean isDisplayed(By locator, Duration timeout) {
         try {
-            waitForVisible(locator);
+            waitUntil("waiting for " + locator + " to be visible", timeout, ExpectedConditions.visibilityOfElementLocated(locator));
             return true;
         } catch (TimeoutException e) {
             return false;
