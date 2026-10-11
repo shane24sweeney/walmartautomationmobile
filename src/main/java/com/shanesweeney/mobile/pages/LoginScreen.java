@@ -16,6 +16,8 @@ public class LoginScreen extends BasePage {
     private static final By CONFIRM_PASSWORD_INPUT = AppiumBy.accessibilityId("input-repeat-password");
     private static final By LOGIN_BUTTON = AppiumBy.accessibilityId("button-LOGIN");
     private static final By SIGN_UP_BUTTON = AppiumBy.accessibilityId("button-SIGN UP");
+    // Only shown when the device has a face or fingerprint enrolled.
+    private static final By BIOMETRIC_BUTTON = AppiumBy.accessibilityId("button-biometric");
 
     public LoginScreen(AppiumDriver driver) {
         super(driver);
@@ -38,6 +40,16 @@ public class LoginScreen extends BasePage {
 
     public boolean showsError(String message) {
         return isDisplayed(byText(message));
+    }
+
+    public boolean hasBiometricLogin() {
+        return isDisplayed(BIOMETRIC_BUTTON);
+    }
+
+    public BiometricPrompt loginWithBiometrics() {
+        scrollTo(BIOMETRIC_BUTTON);
+        tap(BIOMETRIC_BUTTON);
+        return new BiometricPrompt(driver);
     }
 
     public AlertDialog signUp(String email, String password, String confirmPassword) {

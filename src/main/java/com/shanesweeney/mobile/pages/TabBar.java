@@ -12,6 +12,7 @@ public class TabBar extends BasePage {
     // A cold launch (fresh install, or several emulators sharing a CPU) can hold the splash screen
     // well past the normal wait.
     private static final Duration APP_LAUNCH_TIMEOUT = Duration.ofSeconds(60);
+    private static final By WEBVIEW = AppiumBy.accessibilityId("Webview");
     private static final By LOGIN = AppiumBy.accessibilityId("Login");
     private static final By FORMS = AppiumBy.accessibilityId("Forms");
     private static final By SWIPE = AppiumBy.accessibilityId("Swipe");
@@ -26,6 +27,11 @@ public class TabBar extends BasePage {
         waitUntil("waiting for the app to launch and show the tab bar", APP_LAUNCH_TIMEOUT,
                 ExpectedConditions.visibilityOfElementLocated(LOGIN));
         return this;
+    }
+
+    public WebviewScreen openWebview() {
+        tap(WEBVIEW);
+        return new WebviewScreen(driver);
     }
 
     public LoginScreen openLogin() {

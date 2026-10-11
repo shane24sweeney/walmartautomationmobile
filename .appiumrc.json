@@ -5,6 +5,9 @@
     "log-level": "debug",
     "log-no-colors": true,
     "log-timestamp": true,
-    "relaxed-security": false
+    "relaxed-security": false,
+    "allow-insecure": [
+      "uiautomator2:chromedriver_autodownload"
+    ]
   }
 }
