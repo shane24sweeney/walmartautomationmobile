@@ -59,12 +59,12 @@ jobs:
           target: google_apis
           arch: x86_64
           avd-name: ci
-          # The defaults (2 cores, default RAM) starved the emulator: its adb connection dropped mid-run,
-          # killing the UiAutomator2 server. Runners have 4 vCPUs and 16 GB.
-          cores: 4
+          # More memory and disk than the defaults, for the webview and Settings flows. The emulator
+          # stays on 2 vCPUs on this 4-vCPU runner whatever cores/-cores say, so it is still slow; BaseTest
+          # replaces a session that dies mid-run (the emulator's adb connection has dropped here before).
           ram-size: 4096M
           disk-size: 6000M
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -cores 4
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           disable-animations: true
           # UiAutomator2 attaches to the running emulator whose AVD name matches -Davd.
           script: mvn -B test -Dplatform=android -Davd=ci $GROUPS_ARG
