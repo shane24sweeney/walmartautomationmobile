@@ -59,6 +59,11 @@ jobs:
           target: google_apis
           arch: x86_64
           avd-name: ci
+          # The defaults (2 cores, default RAM) starved the emulator: its adb connection dropped mid-run,
+          # killing the UiAutomator2 server. Runners have 4 vCPUs and 16 GB.
+          cores: 4
+          ram-size: 4096M
+          disk-size: 6000M
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           disable-animations: true
           # UiAutomator2 attaches to the running emulator whose AVD name matches -Davd.
