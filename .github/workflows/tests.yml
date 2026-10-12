@@ -64,7 +64,7 @@ jobs:
           cores: 4
           ram-size: 4096M
           disk-size: 6000M
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -cores 4
           disable-animations: true
           # UiAutomator2 attaches to the running emulator whose AVD name matches -Davd.
           script: mvn -B test -Dplatform=android -Davd=ci $GROUPS_ARG
