@@ -10,6 +10,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.openqa.selenium.WebDriverException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Layer 1 (tests): owns the app session; test classes extend this and use pages only.
@@ -20,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(TestArtifacts.class)
 public abstract class BaseTest {
+    private static final Logger log = LoggerFactory.getLogger(BaseTest.class);
     protected AppiumDriver driver;
     // Entry point to every screen: tests navigate from here and never touch the driver.
     protected TabBar tabBar;
@@ -38,10 +42,37 @@ public abstract class BaseTest {
         }
     }
 
+    /**
+     * If the session can't restart the app and find its first screen, it is beyond repair, e.g. the
+     * emulator's adb connection dropped and took the UiAutomator2 server with it. (Restarting alone
+     * isn't proof: Appium does that over adb, so it still works with UiAutomator2 dead.) A new session
+     * then lets the rest of the class run, instead of every remaining test failing on the dead one.
+     */
     @BeforeEach
     void restartApp() {
+        try {
+            restartAndWaitForApp();
+        } catch (WebDriverException e) {
+            log.warn("Session {} on {} is unusable, starting a new one: {}",
+                    driver.getSessionId(), device.name(), String.valueOf(e.getMessage()).lines().findFirst().orElse(""));
+            replaceSession();
+            restartAndWaitForApp();
+        }
+    }
+
+    private void restartAndWaitForApp() {
         AppUnderTest.restart(driver);
         tabBar.waitUntilShown();
+    }
+
+    private void replaceSession() {
+        try {
+            driver.quit();
+        } catch (WebDriverException e) {
+            // The old session is already broken; ending it is best effort.
+        }
+        driver = DriverFactory.create(device);
+        tabBar = new TabBar(driver);
     }
 
     @AfterAll
