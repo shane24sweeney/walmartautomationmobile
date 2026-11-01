@@ -95,6 +95,7 @@ jobs:
             appium-*.log
             target/appium-http.log
           if-no-files-found: ignore
+          retention-days: 7
 
   # macOS minutes count 10x against a private repo's Actions quota, so iOS runs on demand only.
   ios:
@@ -153,3 +154,4 @@ jobs:
             appium-*.log
             target/appium-http.log
           if-no-files-found: ignore
+          retention-days: 7
